@@ -1,0 +1,9 @@
+filetype==1.0.7
+matplotlib==3.4.2
+scipy==1.6.3
+shapely==1.7.1
+numpy==1.21.0
+opencv-python==4.5.2.54
+Pillow==8.2.0
+pip-chill==1.0.1
+pypylon==1.7.2
