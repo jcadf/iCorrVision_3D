@@ -34,27 +34,40 @@
 
 V = 'v1.04.22' # Version
 
+import csv
+import ctypes
+import datetime;
+import glob
+import multiprocessing as mp
+import ntpath
+import os
+import subprocess
+import time
 ########################################################################################################################
 # Modules
 ########################################################################################################################
-import tkinter as tk; from tkinter import *
-import os
-import subprocess
-from tkinter import filedialog
+import tkinter as tk;
 from math import pi
-import numpy as np; from threading import Thread; import glob
-from numpy import genfromtxt
-import cv2 as cv; from PIL import ImageTk; import time
-from tkinter import messagebox; from PIL import Image;
-import datetime; from shapely.geometry import Point; from scipy import interpolate
-from shapely.geometry.polygon import Polygon; from scipy.interpolate import interp2d
-import matplotlib; import ntpath
-from matplotlib import pyplot as plt
-from scipy.spatial.transform import Rotation
-import csv
-import ctypes
-import multiprocessing as mp
 from multiprocessing.sharedctypes import RawArray
+from threading import Thread;
+from tkinter import *
+from tkinter import filedialog
+from tkinter import messagebox;
+from tkinter import ttk
+
+import cv2 as cv;
+import matplotlib;
+import numpy as np;
+from PIL import Image;
+from PIL import ImageTk;
+from matplotlib import pyplot as plt
+from numpy import genfromtxt
+from scipy import interpolate
+from scipy.interpolate import interp2d
+from scipy.spatial.transform import Rotation
+from shapely.geometry import Point;
+from shapely.geometry.polygon import Polygon;
+
 matplotlib.use('Agg', force=True)
 
 ########################################################################################################################
@@ -62,6 +75,14 @@ matplotlib.use('Agg', force=True)
 ########################################################################################################################
 def openguide(CurrentDir):
     subprocess.Popen([CurrentDir + '\static\iCorrVision-3D.pdf'], shell=True)
+
+########################################################################################################################
+# Configure combobox
+########################################################################################################################
+def combo_configure(event):
+    width = 40
+    style = ttk.Style()
+    style.configure(style='TCombobox', postoffset=(0, 0, width, 0))
 
 ########################################################################################################################
 # Global variables declaration for parallel computing (x0, y0, u0, v0, x1, y1, u1 and v1)
@@ -605,16 +626,18 @@ def load(menu, captured_status, console, canvas_left, canvas_right, file_var, V,
         NumCut.set(lines[w]); w = w + 2
         Adjust.set(lines[w])
 
+        CapturedImagesFolderName = capturedFolder.get().rsplit('/', 1)[1]
+        capturedFolder.set(file_load.rsplit('/', 1)[0] + '/' + CapturedImagesFolderName)
+        fileNamesLeft = sorted(glob.glob(capturedFolder.get() + '/Left/*'), key=stringToList)
+        fileNamesRight = sorted(glob.glob(capturedFolder.get() + '/Right/*'), key=stringToList)
+        Format = '.' + fileNamesLeft[0].rsplit('.', 1)[1]
+        Images = len(fileNamesLeft)
+
         captured_status.configure(bg = '#00cd00') # Green indicator
         console.insert(tk.END,
                        '##################################################################################################################\n\n')
         console.insert(tk.END, f'Image captured folder - {capturedFolder.get()}\n\n')
         console.see('insert')
-
-        fileNamesLeft = sorted(glob.glob(capturedFolder.get()+'\\Left\\*'),key=stringToList)
-        fileNamesRight = sorted(glob.glob(capturedFolder.get()+'\\Right\\*'),key=stringToList)
-        Format = '.'+fileNamesLeft[0].rsplit('.', 1)[1]
-        Images = len(fileNamesLeft)
 
         # Left image resolution correction:
         fig_left = plt.figure()
@@ -735,6 +758,8 @@ def load(menu, captured_status, console, canvas_left, canvas_right, file_var, V,
         test_captured = True
         file_var.set(True)
 
+        CalibrationFileName = calibFile.get().rsplit('/', 1)[1]
+        calibFile.set(file_load.rsplit('/', 1)[0] + '/' + CalibrationFileName)
         calib_status.configure(bg = '#00cd00') # Green indicator
         console.insert(tk.END, f'Calibration file - {calibFile.get()}\n\n')
         console.see('insert')

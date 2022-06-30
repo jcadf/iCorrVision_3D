@@ -34,15 +34,19 @@
 
 V = 'v1.04.22' # Version
 
+import os
+import tkinter as tk;
+import tkinter.scrolledtext as st
+from tkinter import *;
+from tkinter import ttk
+
 ########################################################################################################################
 # Modules
 ########################################################################################################################
 import numpy as np
-import tkinter as tk; from tkinter import *; import os
-import tkinter.scrolledtext as st
-from tkinter import ttk
-import modules as module
 from PIL import Image, ImageTk
+
+import modules as module
 
 ########################################################################################################################
 # Graphical interface - tkinter
@@ -178,6 +182,8 @@ if __name__ == '__main__':
     # GUI style:
     s = ttk.Style()
     s.theme_use('alt')
+    s.configure(style='TCombobox', fieldbackground='#ccd9e1')
+    s.configure(style='TSpinbox', fieldbackground='#ccd9e1', arrowsize=13)
 
     # Grid configuration:
     xinit = 20; yinit = 20; dyinit = 50; dxinit = 168
@@ -231,7 +237,7 @@ if __name__ == '__main__':
     # Configuration used in the correlation module (Eulerian or Lagrangian):
     Label(menu, text = 'Config.:',bg='#99b3c3', fg ='#282C34', font = ('Heveltica',10) ).place(x=xinit-1,y=yinit+dyinit*3+23+10)
     corr_method = ttk.Combobox(menu, textvariable=Method, font = ('Heveltica',10))
-    corr_method['values'] = ('Select','Eulerian','Lagrangian')
+    corr_method['values'] = ('Select','Eulerian','Lagrangian','Lagrangian H', 'Lagrangian V')
     corr_method.place(x=xinit,y=yinit+23*2+dyinit*3+10,width=82,height=25)
 
     # Correlation strategy used in the correlation module (Spatial or Incremental):

@@ -34,24 +34,30 @@
 
 V = 'v1.04.22' # Version
 
+import datetime
+import glob
+import ntpath
+import subprocess
+import tkinter as tk;
+from threading import Thread
+from tkinter import *
+from tkinter import filedialog
+from tkinter import messagebox
+
 ########################################################################################################################
 # Modules
 ########################################################################################################################
-import cv2; import numpy as np
-import tkinter as tk; from tkinter import *
-from tkinter import messagebox
-from tkinter import filedialog
-import glob
-import subprocess
-from threading import Thread
+import cv2;
+import cv2 as cv;
 import matplotlib
-from matplotlib.pyplot import gca; import ntpath
-import cv2 as cv; import scipy; import scipy.optimize
+import numpy as np
+import scipy;
+import scipy.optimize
 from PIL import Image, ImageTk
-import datetime
 from matplotlib import pyplot as plt
+from matplotlib.pyplot import gca;
+
 matplotlib.use('Agg', force=True)
-plt.rcParams["text.usetex"]= True
 
 ########################################################################################################################
 # Open user guide 2D
@@ -542,21 +548,29 @@ def load(menu, console, file, file_var, resultsFolder, selectionFolder, figureFo
     exyMin.set(lines[w]); w = w + 1
     ReconstructionMin.set(lines[w])
 
+    ResultsFolderName = resultsFolder.get().rsplit('/', 1)[1]
+    resultsFolder.set(file_load.rsplit('/', 1)[0] + '/' + ResultsFolderName)
     results_status.configure(bg = '#00cd00') # Green indicator
     console.insert(tk.END, '#############################################################################\n\n')
     console.insert(tk.END, f'Results folder - {resultsFolder.get()}\n\n')
     console.see('insert')
 
+    ImageSelectionFolderName = selectionFolder.get().rsplit('/', 1)[1]
+    selectionFolder.set(file_load.rsplit('/', 1)[0] + '/' + ImageSelectionFolderName)
     selection_status.configure(bg='#00cd00')  # Green indicator
     console.insert(tk.END, f'Images folder - {selectionFolder.get()}\n\n')
     console.see('insert')
 
-    fileNames = sorted(glob.glob(selectionFolder.get() + '\\*'), key=stringToList)
+    fileNames = sorted(glob.glob(selectionFolder.get() + '/*'), key=stringToList)
 
+    FiguresFolderName = figureFolder.get().rsplit('/', 1)[1]
+    figureFolder.set(file_load.rsplit('/', 1)[0] + '/' + FiguresFolderName)
     figure_status.configure(bg = '#00cd00') # Green indicator
     console.insert(tk.END, f'All figures will be saved in {figureFolder.get()}\n\n')
     console.see('insert')
 
+    OutputFolderName = outputFolder.get().rsplit('/', 1)[1]
+    outputFolder.set(file_load.rsplit('/', 1)[0] + '/' + OutputFolderName)
     save_out_status.configure(bg='#00cd00')  # Green indicator
     console.insert(tk.END, f'The output fields will be saved in {outputFolder.get()}\n\n')
     console.see('insert')
@@ -1319,10 +1333,10 @@ def plot(console, canvas, wDisplacementCheck, wDisplacementCheckAuto, wDisplacem
                             zmi_meshWCS[k][int(i-sw_step)][int(j-sw_step)] = fit_z[0]+fit_z[1]*x0WCS+fit_z[2]*y0WCS+fit_z[3]*x0WCS*y0WCS+fit_z[4]*x0WCS**2+fit_z[5]*y0WCS**2+fit_z[6]*y0WCS*x0WCS**2+fit_z[7]*x0WCS*y0WCS**2+fit_z[8]*(x0WCS**2)*(y0WCS**2)
 
                             # Gradients using the estimated parameters in WCS
-                            dudxWCS[k][int(i-sw_step)][int(j-sw_step)] = fit_u[1]+fit_u[3]*y0+2*fit_u[4]*x0+2*fit_u[6]*x0*y0+fit_u[7]*y0**2+2*fit_u[8]*x0*y0**2
-                            dudyWCS[k][int(i-sw_step)][int(j-sw_step)] = fit_u[2]+fit_u[3]*x0+2*fit_u[5]*y0+fit_u[6]*x0**2+2*fit_u[7]*x0*y0+2*fit_u[8]*y0*x0**2
-                            dvdxWCS[k][int(i-sw_step)][int(j-sw_step)] = fit_v[1]+fit_v[3]*y0+2*fit_v[4]*x0+2*fit_v[6]*x0*y0+fit_v[7]*y0**2+2*fit_v[8]*x0*y0**2
-                            dvdyWCS[k][int(i-sw_step)][int(j-sw_step)] = fit_v[2]+fit_v[3]*x0+2*fit_v[5]*y0+fit_v[6]*x0**2+2*fit_v[7]*x0*y0+2*fit_v[8]*y0*x0**2
+                            dudxWCS[k][int(i-sw_step)][int(j-sw_step)] = fit_u[1]+fit_u[3]*y0WCS+2*fit_u[4]*x0WCS+2*fit_u[6]*x0WCS*y0WCS+fit_u[7]*y0WCS**2+2*fit_u[8]*x0WCS*y0WCS**2
+                            dudyWCS[k][int(i-sw_step)][int(j-sw_step)] = fit_u[2]+fit_u[3]*x0WCS+2*fit_u[5]*y0WCS+fit_u[6]*x0WCS**2+2*fit_u[7]*x0WCS*y0WCS+2*fit_u[8]*y0WCS*x0WCS**2
+                            dvdxWCS[k][int(i-sw_step)][int(j-sw_step)] = fit_v[1]+fit_v[3]*y0WCS+2*fit_v[4]*x0WCS+2*fit_v[6]*x0WCS*y0WCS+fit_v[7]*y0WCS**2+2*fit_v[8]*x0WCS*y0WCS**2
+                            dvdyWCS[k][int(i-sw_step)][int(j-sw_step)] = fit_v[2]+fit_v[3]*x0WCS+2*fit_v[5]*y0WCS+fit_v[6]*x0WCS**2+2*fit_v[7]*x0WCS*y0WCS+2*fit_v[8]*y0WCS*x0WCS**2
 
                             # Non-linear least squares using shape functions - p0 is the initial guess for the parameters in SPCS
                             fit_u, pcou = scipy.optimize.curve_fit(fQ9, [xx0SPCS, yy0SPCS], uu0SPCS,p0=[0, 0, 0, 0, 0, 0, 0, 0, 0])
@@ -1337,10 +1351,10 @@ def plot(console, canvas, wDisplacementCheck, wDisplacementCheckAuto, wDisplacem
                             zmi_meshSPCS[k][int(i - sw_step)][int(j - sw_step)] = fit_z[0] + fit_z[1] * x0SPCS + fit_z[2] * y0SPCS + fit_z[3] * x0SPCS * y0SPCS + fit_z[4] * x0SPCS ** 2 + fit_z[5] * y0SPCS ** 2 + fit_z[6] * y0SPCS * x0SPCS ** 2 + fit_z[7] * x0SPCS * y0SPCS ** 2 + fit_z[8] * (x0SPCS ** 2) * (y0SPCS ** 2)
 
                             # Gradients using the estimated parameters in SPCS
-                            dudxSPCS[k][int(i - sw_step)][int(j - sw_step)] = fit_u[1] + fit_u[3] * y0 + 2 * fit_u[4] * x0 + 2 * fit_u[6] * x0 * y0 + fit_u[7] * y0 ** 2 + 2 * fit_u[8] * x0 * y0 ** 2
-                            dudySPCS[k][int(i - sw_step)][int(j - sw_step)] = fit_u[2] + fit_u[3] * x0 + 2 * fit_u[5] * y0 + fit_u[6] * x0 ** 2 + 2 * fit_u[7] * x0 * y0 + 2 * fit_u[8] * y0 * x0 ** 2
-                            dvdxSPCS[k][int(i - sw_step)][int(j - sw_step)] = fit_v[1] + fit_v[3] * y0 + 2 * fit_v[4] * x0 + 2 * fit_v[6] * x0 * y0 + fit_v[7] * y0 ** 2 + 2 * fit_v[8] * x0 * y0 ** 2
-                            dvdySPCS[k][int(i - sw_step)][int(j - sw_step)] = fit_v[2] + fit_v[3] * x0 + 2 * fit_v[5] * y0 + fit_v[6] * x0 ** 2 + 2 * fit_v[7] * x0 * y0 + 2 * fit_v[8] * y0 * x0 ** 2
+                            dudxSPCS[k][int(i - sw_step)][int(j - sw_step)] = fit_u[1] + fit_u[3] * y0SPCS + 2 * fit_u[4] * x0SPCS + 2 * fit_u[6] * x0SPCS * y0SPCS + fit_u[7] * y0SPCS ** 2 + 2 * fit_u[8] * x0SPCS * y0SPCS ** 2
+                            dudySPCS[k][int(i - sw_step)][int(j - sw_step)] = fit_u[2] + fit_u[3] * x0SPCS + 2 * fit_u[5] * y0SPCS + fit_u[6] * x0SPCS ** 2 + 2 * fit_u[7] * x0SPCS * y0SPCS + 2 * fit_u[8] * y0SPCS * x0SPCS ** 2
+                            dvdxSPCS[k][int(i - sw_step)][int(j - sw_step)] = fit_v[1] + fit_v[3] * y0SPCS + 2 * fit_v[4] * x0SPCS + 2 * fit_v[6] * x0SPCS * y0SPCS + fit_v[7] * y0SPCS ** 2 + 2 * fit_v[8] * x0SPCS * y0SPCS ** 2
+                            dvdySPCS[k][int(i - sw_step)][int(j - sw_step)] = fit_v[2] + fit_v[3] * x0SPCS + 2 * fit_v[5] * y0SPCS + fit_v[6] * x0SPCS ** 2 + 2 * fit_v[7] * x0SPCS * y0SPCS + 2 * fit_v[8] * y0SPCS * x0SPCS ** 2
 
                         # Total displacement in WCS
                         uvmi_meshWCS[k][int(i - sw_step)][int(j - sw_step)] = np.sqrt(umi_meshWCS[k][int(i - sw_step)][int(j - sw_step)] ** 2 + vmi_meshWCS[k][int(i - sw_step)][int(j - sw_step)] ** 2)
@@ -1488,52 +1502,77 @@ def plot(console, canvas, wDisplacementCheck, wDisplacementCheckAuto, wDisplacem
                             dvdy[k][int(i - sw_step)][int(j - sw_step)] = 0
 
                         if Shape_function.get() == 'Bilinear':
-                            # Non-linear least squares using shape functions - p0 is the initial guess for the parameters
-                            fit_u, pcou = scipy.optimize.curve_fit(fQ4, [xx0, yy0], uu0, p0=[0, 0, 0, 0])
-                            fit_v, pcov = scipy.optimize.curve_fit(fQ4, [xx0, yy0], vv0, p0=[0, 0, 0, 0])
 
-                            # Corrected displacements on point (x0,y0)
-                            umi_mesh[k][int(i - sw_step)][int(j - sw_step)] = fit_u[0] + fit_u[
-                                1] * x0 + fit_u[2] * y0 + fit_u[3] * x0 * y0
-                            vmi_mesh[k][int(i - sw_step)][int(j - sw_step)] = fit_v[0] + fit_v[
-                                1] * x0 + fit_v[2] * y0 + fit_v[3] * x0 * y0
+                            try:
+                                # Non-linear least squares using shape functions - p0 is the initial guess for the parameters
+                                fit_u, pcou = scipy.optimize.curve_fit(fQ4, [xx0, yy0], uu0, p0=[0, 0, 0, 0])
+                                fit_v, pcov = scipy.optimize.curve_fit(fQ4, [xx0, yy0], vv0, p0=[0, 0, 0, 0])
 
-                            # Gradients using the estimated parameters
-                            dudx[k][int(i - sw_step)][int(j - sw_step)] = fit_u[1] + fit_u[3] * y0
-                            dudy[k][int(i - sw_step)][int(j - sw_step)] = fit_u[2] + fit_u[3] * x0
-                            dvdx[k][int(i - sw_step)][int(j - sw_step)] = fit_v[1] + fit_v[3] * y0
-                            dvdy[k][int(i - sw_step)][int(j - sw_step)] = fit_v[2] + fit_v[3] * x0
+                                # Corrected displacements on point (x0,y0)
+                                umi_mesh[k][int(i - sw_step)][int(j - sw_step)] = fit_u[0] + fit_u[
+                                    1] * x0 + fit_u[2] * y0 + fit_u[3] * x0 * y0
+                                vmi_mesh[k][int(i - sw_step)][int(j - sw_step)] = fit_v[0] + fit_v[
+                                    1] * x0 + fit_v[2] * y0 + fit_v[3] * x0 * y0
+
+                                # Gradients using the estimated parameters
+                                dudx[k][int(i - sw_step)][int(j - sw_step)] = fit_u[1] + fit_u[3] * y0
+                                dudy[k][int(i - sw_step)][int(j - sw_step)] = fit_u[2] + fit_u[3] * x0
+                                dvdx[k][int(i - sw_step)][int(j - sw_step)] = fit_v[1] + fit_v[3] * y0
+                                dvdy[k][int(i - sw_step)][int(j - sw_step)] = fit_v[2] + fit_v[3] * x0
+
+                            except:
+                                # Corrected displacements on point (x0,y0)
+                                umi_mesh[k][int(i - sw_step)][int(j - sw_step)] = np.nan
+                                vmi_mesh[k][int(i - sw_step)][int(j - sw_step)] = np.nan
+
+                                # Gradients using the estimated parameters
+                                dudx[k][int(i - sw_step)][int(j - sw_step)] = np.nan
+                                dudy[k][int(i - sw_step)][int(j - sw_step)] = np.nan
+                                dvdx[k][int(i - sw_step)][int(j - sw_step)] = np.nan
+                                dvdy[k][int(i - sw_step)][int(j - sw_step)] = np.nan
 
                         if Shape_function.get() == 'Biquadratic':
-                            # Non-linear least squares using shape functions - p0 is the initial guess for the parameters
-                            fit_u, pcou = scipy.optimize.curve_fit(fQ9, [xx0, yy0], uu0, p0=[0, 0, 0, 0, 0, 0, 0, 0, 0])
-                            fit_v, pcov = scipy.optimize.curve_fit(fQ9, [xx0, yy0], vv0, p0=[0, 0, 0, 0, 0, 0, 0, 0, 0])
 
-                            # Corrected displacements on point (x0,y0)
-                            umi_mesh[k][int(i - sw_step)][int(j - sw_step)] = fit_u[0] + fit_u[1] * x0 + fit_u[2] * y0 + \
-                                                                              fit_u[3] * x0 * y0 + fit_u[4] * x0 ** 2 + \
-                                                                              fit_u[5] * y0 ** 2 + fit_u[
-                                                                                  6] * y0 * x0 ** 2 + fit_u[
-                                                                                  7] * x0 * y0 ** 2 + fit_u[8] * (
-                                                                                          x0 ** 2) * (y0 ** 2)
-                            vmi_mesh[k][int(i - sw_step)][int(j - sw_step)] = fit_v[0] + fit_v[1] * x0 + fit_v[2] * y0 + \
-                                                                              fit_v[3] * x0 * y0 + fit_v[4] * x0 ** 2 + \
-                                                                              fit_v[5] * y0 ** 2 + fit_v[
-                                                                                  6] * y0 * x0 ** 2 + fit_v[
-                                                                                  7] * x0 * y0 ** 2 + fit_v[8] * (
-                                                                                          x0 ** 2) * (y0 ** 2)
+                            try:
+                                # Non-linear least squares using shape functions - p0 is the initial guess for the parameters
+                                fit_u, pcou = scipy.optimize.curve_fit(fQ9, [xx0, yy0], uu0, p0=[0, 0, 0, 0, 0, 0, 0, 0, 0])
+                                fit_v, pcov = scipy.optimize.curve_fit(fQ9, [xx0, yy0], vv0, p0=[0, 0, 0, 0, 0, 0, 0, 0, 0])
 
-                            # Gradients using the estimated parameters
-                            dudx[k][int(i - sw_step)][int(j - sw_step)] = fit_u[1] + fit_u[3] * y0 + 2 * fit_u[
-                                4] * x0 + 2 * fit_u[6] * x0 * y0 + fit_u[7] * y0 ** 2 + 2 * fit_u[8] * x0 * y0 ** 2
-                            dudy[k][int(i - sw_step)][int(j - sw_step)] = fit_u[2] + fit_u[3] * x0 + 2 * fit_u[5] * y0 + \
-                                                                          fit_u[6] * x0 ** 2 + 2 * fit_u[
-                                                                              7] * x0 * y0 + 2 * fit_u[8] * y0 * x0 ** 2
-                            dvdx[k][int(i - sw_step)][int(j - sw_step)] = fit_v[1] + fit_v[3] * y0 + 2 * fit_v[
-                                4] * x0 + 2 * fit_v[6] * x0 * y0 + fit_v[7] * y0 ** 2 + 2 * fit_v[8] * x0 * y0 ** 2
-                            dvdy[k][int(i - sw_step)][int(j - sw_step)] = fit_v[2] + fit_v[3] * x0 + 2 * fit_v[5] * y0 + \
-                                                                          fit_v[6] * x0 ** 2 + 2 * fit_v[
-                                                                              7] * x0 * y0 + 2 * fit_v[8] * y0 * x0 ** 2
+                                # Corrected displacements on point (x0,y0)
+                                umi_mesh[k][int(i - sw_step)][int(j - sw_step)] = fit_u[0] + fit_u[1] * x0 + fit_u[2] * y0 + \
+                                                                                  fit_u[3] * x0 * y0 + fit_u[4] * x0 ** 2 + \
+                                                                                  fit_u[5] * y0 ** 2 + fit_u[
+                                                                                      6] * y0 * x0 ** 2 + fit_u[
+                                                                                      7] * x0 * y0 ** 2 + fit_u[8] * (
+                                                                                              x0 ** 2) * (y0 ** 2)
+                                vmi_mesh[k][int(i - sw_step)][int(j - sw_step)] = fit_v[0] + fit_v[1] * x0 + fit_v[2] * y0 + \
+                                                                                  fit_v[3] * x0 * y0 + fit_v[4] * x0 ** 2 + \
+                                                                                  fit_v[5] * y0 ** 2 + fit_v[
+                                                                                      6] * y0 * x0 ** 2 + fit_v[
+                                                                                      7] * x0 * y0 ** 2 + fit_v[8] * (
+                                                                                              x0 ** 2) * (y0 ** 2)
+
+                                # Gradients using the estimated parameters
+                                dudx[k][int(i - sw_step)][int(j - sw_step)] = fit_u[1] + fit_u[3] * y0 + 2 * fit_u[
+                                    4] * x0 + 2 * fit_u[6] * x0 * y0 + fit_u[7] * y0 ** 2 + 2 * fit_u[8] * x0 * y0 ** 2
+                                dudy[k][int(i - sw_step)][int(j - sw_step)] = fit_u[2] + fit_u[3] * x0 + 2 * fit_u[5] * y0 + \
+                                                                              fit_u[6] * x0 ** 2 + 2 * fit_u[
+                                                                                  7] * x0 * y0 + 2 * fit_u[8] * y0 * x0 ** 2
+                                dvdx[k][int(i - sw_step)][int(j - sw_step)] = fit_v[1] + fit_v[3] * y0 + 2 * fit_v[
+                                    4] * x0 + 2 * fit_v[6] * x0 * y0 + fit_v[7] * y0 ** 2 + 2 * fit_v[8] * x0 * y0 ** 2
+                                dvdy[k][int(i - sw_step)][int(j - sw_step)] = fit_v[2] + fit_v[3] * x0 + 2 * fit_v[5] * y0 + \
+                                                                              fit_v[6] * x0 ** 2 + 2 * fit_v[
+                                                                                  7] * x0 * y0 + 2 * fit_v[8] * y0 * x0 ** 2
+                            except:
+                                # Corrected displacements on point (x0,y0)
+                                umi_mesh[k][int(i - sw_step)][int(j - sw_step)] = np.nan
+                                vmi_mesh[k][int(i - sw_step)][int(j - sw_step)] = np.nan
+
+                                # Gradients using the estimated parameters
+                                dudx[k][int(i - sw_step)][int(j - sw_step)] = np.nan
+                                dudy[k][int(i - sw_step)][int(j - sw_step)] = np.nan
+                                dvdx[k][int(i - sw_step)][int(j - sw_step)] = np.nan
+                                dvdy[k][int(i - sw_step)][int(j - sw_step)] = np.nan
 
                         # Total displacement
                         uvmi_mesh[k][int(i - sw_step)][int(j - sw_step)] = np.sqrt(
@@ -1709,8 +1748,8 @@ def generate_figure_grid(console, Image, Nex, Ney, X, Y, Cal, Method, Tag, Alpha
         locsy = np.linspace(0, abs(ymax), yTicks.get(), endpoint=True)
         plt.xticks(locsx, np.round(np.array(locsx * Cal), AxesDigits.get()))
         plt.yticks(locsy, np.round(np.array(locsy * Cal), AxesDigits.get()))
-        plt.xlabel(r'$x$ [mm]', fontname=TextFont.get(), fontsize=FontSize.get())
-        plt.ylabel(r'$y$ [mm]', fontname=TextFont.get(), fontsize=FontSize.get())
+        plt.xlabel('x [mm]', fontname=TextFont.get(), fontsize=FontSize.get())
+        plt.ylabel('y [mm]', fontname=TextFont.get(), fontsize=FontSize.get())
 
     else:
         plt.axis('off')
@@ -1736,7 +1775,7 @@ def generate_figure_field(console, Image, Nex, Ney, X, Y, Cal, Method, Tag, Alph
                           figureFolder,Color_map, color_map_dict):
 
     # Captured image - Eulerian (reference image) - Lagrangian (current image):
-    I = cv2.imread(fileNames[Image-1]) if Method.get() == 'Lagrangian' else cv2.imread(fileNames[0])
+    I = cv2.imread(fileNames[Image-1]) if Method.get() == 'Lagrangian' or Method.get() == 'Lagrangian V' or Method.get() == 'Lagrangian H' else cv2.imread(fileNames[0])
 
     # Color map:
     color_map_var = ['Blues','Greens','Greys','Oranges','Reds','afmhot','autumn','bone','copper','hot','hsv','jet','winter']
@@ -1787,8 +1826,8 @@ def generate_figure_field(console, Image, Nex, Ney, X, Y, Cal, Method, Tag, Alph
             locsy = np.linspace(0, abs(ymax), yTicks.get(), endpoint=True)
             plt.xticks(locsx, np.round(np.array(locsx * Cal), AxesDigits.get()))
             plt.yticks(locsy, np.round(np.array(locsy * Cal), AxesDigits.get()))
-            plt.xlabel(r'$x$ [mm]', fontname=TextFont.get(), fontsize=FontSize.get())
-            plt.ylabel(r'$y$ [mm]', fontname=TextFont.get(), fontsize=FontSize.get())
+            plt.xlabel('x [mm]', fontname=TextFont.get(), fontsize=FontSize.get())
+            plt.ylabel('y [mm]', fontname=TextFont.get(), fontsize=FontSize.get())
             #cb = plt.colorbar(ticks=locscb,
             #                  format=f'%.{cbarDigits.get()}{cbar_format.get(cbarFormat.get())}')
 
@@ -1804,8 +1843,8 @@ def generate_figure_field(console, Image, Nex, Ney, X, Y, Cal, Method, Tag, Alph
             locsy = np.linspace(0, abs(ymax), yTicks.get(), endpoint=True)
             plt.xticks(locsx, np.round(np.array(locsx * Cal), AxesDigits.get()))
             plt.yticks(locsy, np.round(np.array(locsy * Cal), AxesDigits.get()))
-            plt.xlabel(r'$x$ [mm]', fontname=TextFont.get(), fontsize=FontSize.get())
-            plt.ylabel(r'$y$ [mm]', fontname=TextFont.get(), fontsize=FontSize.get())
+            plt.xlabel('x [mm]', fontname=TextFont.get(), fontsize=FontSize.get())
+            plt.ylabel('y [mm]', fontname=TextFont.get(), fontsize=FontSize.get())
             cb = plt.colorbar(ticks=locscb,
                               format=f'%.{cbarDigits.get()}{cbar_format.get(cbarFormat.get())}')
 

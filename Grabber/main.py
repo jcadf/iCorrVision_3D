@@ -34,17 +34,18 @@
 
 V = 'v1.04.22' # Version
 
+import os
 ########################################################################################################################
 # Modules
 ########################################################################################################################
 import tkinter as tk
-from tkinter import *
-import os
 import tkinter.scrolledtext as st
 from threading import Thread
-from PIL import Image, ImageTk
-from tkinter import messagebox
+from tkinter import *
 from tkinter import ttk
+
+from PIL import Image, ImageTk
+
 import modules as module
 
 ########################################################################################################################
@@ -65,6 +66,7 @@ if __name__ == '__main__':
     # GUI style:
     s = ttk.Style()
     s.theme_use('alt')
+    s.configure(style='TCombobox', fieldbackground='#ccd9e1')
 
     # Global variables:
     global selectionFolder; selectionFolder = StringVar(menu)

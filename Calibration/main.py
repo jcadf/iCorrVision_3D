@@ -34,15 +34,19 @@
 
 V = 'v1.04.22' # Version
 
+import os
+import tkinter as tk;
+import tkinter.scrolledtext as st
+from threading import Thread
+from tkinter import *
+from tkinter import ttk;
+
 ########################################################################################################################
 # Modules
 ########################################################################################################################
 import numpy as np
-from threading import Thread
-import tkinter as tk; from tkinter import ttk; from tkinter import *
-import os
-import tkinter.scrolledtext as st
 from PIL import Image, ImageTk
+
 import modules as module
 
 ########################################################################################################################
@@ -63,6 +67,7 @@ if __name__ == '__main__':
     # GUI style:
     s = ttk.Style()
     s.theme_use('alt')
+    s.configure(style='TCombobox', fieldbackground='#ccd9e1')
 
     # Global variables:
     global abort_param; abort_param = BooleanVar(menu); abort_param.set(False)

@@ -34,24 +34,29 @@
 
 V = 'v1.04.22' # Version
 
+import multiprocessing as mp
+import os
 ########################################################################################################################
 # Modules
 ########################################################################################################################
 import tkinter as tk
-from tkinter import ttk
-from tkinter import *
 import tkinter.scrolledtext as st
-import modules as module
 from threading import Thread
-from PIL import Image, ImageTk
-import os
+from tkinter import *
+from tkinter import ttk
+
 import numpy as np
-import multiprocessing as mp
+from PIL import Image, ImageTk
+
+import modules as module
 
 ########################################################################################################################
 # Graphical interface - tkinter
 ########################################################################################################################
 if __name__ == '__main__':
+
+    # Pyinstaller fix
+    mp.freeze_support()
 
     # Current directory:
     CurrentDir = os.path.dirname(os.path.realpath(__file__))
@@ -75,6 +80,8 @@ if __name__ == '__main__':
     # GUI style:
     s = ttk.Style()
     s.theme_use('alt')
+    s.configure(style='TCombobox', fieldbackground='#ccd9e1')
+    s.configure(style='TSpinbox', fieldbackground='#ccd9e1', arrowsize=13)
 
     # Global variables:
     global ResultsName; ResultsName = StringVar(menu); ResultsName.set('Results_Correlation')
@@ -162,8 +169,8 @@ if __name__ == '__main__':
     # Interface to select the number of processors (cores):
     Label(menu, text='Number of processors:', bg='#99b3c3', fg='#282C34', font=('Heveltica', 10)).place(x=xinit + 
         dxinit + 181, y=yinit + dyinit * 2-23)
-    spinbox = ttk.Spinbox(menu, from_= 2, to= mp.cpu_count(), increment=2,textvariable=Cores, font=('Heveltica', 10))
-    spinbox.place(x=xinit + dxinit + 181, y=yinit + dyinit * 2, width=135, height=25)
+    spinbox = ttk.Spinbox(menu, from_= 2, to= mp.cpu_count(), increment=2,textvariable=Cores, font=('Heveltica', 10),style='TSpinbox')
+    spinbox.place(x=xinit + dxinit + 181, y=yinit + dyinit * 2, width=135, height=26)
     spinbox.set(mp.cpu_count())
 
     # Output folder name. Default name -> Results_Correlation
@@ -328,8 +335,9 @@ if __name__ == '__main__':
     # Type of cutting regions (Free, circular or rectangular):
     Label(menu, text='Type of cut:', bg='#99b3c3', fg='#282C34', font=('Heveltica', 10)).place(
         x=xinit - 1 + dxinit * 6 - 55, y=yinit + dyinit * 8 + 23)
-    type_cut = ttk.Combobox(menu, textvariable=TypeCut, font=('Heveltica', 10))
+    type_cut = ttk.Combobox(menu, textvariable=TypeCut, font=('Heveltica', 10), style = 'TCombobox')
     type_cut['values'] = ('None', 'Free', 'Rectangular', 'Circular inside', 'Circular outside')
+    type_cut.bind('<ButtonPress>', module.combo_configure)
     type_cut.place(x=xinit + dxinit * 6 - 55, y=yinit + 23 * 2 + dyinit * 8, width=77, height=25)
     type_cut.current(0)
 
